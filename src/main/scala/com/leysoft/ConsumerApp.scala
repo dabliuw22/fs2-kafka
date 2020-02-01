@@ -4,10 +4,14 @@ import cats.effect.{ExitCode, IO, IOApp}
 import com.leysoft.serde.JsonSerde
 import com.leysoft.domain.Message
 import fs2.kafka._
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+
 import scala.concurrent.duration._
 
 object ConsumerApp extends IOApp {
   import cats.syntax.functor._ // for as()
+
+  val logger = Slf4jLogger.getLoggerFromClass[IO](ConsumerApp.getClass)
 
   val keyDeserializer: Deserializer[IO, String] = Deserializer[IO, String]
   val deserializer: Deserializer[IO, Message] = Deserializer.delegate[IO, Message](JsonSerde())
@@ -30,5 +34,5 @@ object ConsumerApp extends IOApp {
     .compile.drain.as(ExitCode.Success)
 
   def process(record: ConsumerRecord[String, Message]): IO[Unit] =
-    IO { println(s"Message: ${record.value}") }
+    IO { logger.info(s"Message: ${record.value}") }
 }
