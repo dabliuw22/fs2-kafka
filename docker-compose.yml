@@ -1,0 +1,20 @@
+version: "3"
+services:
+  zookeeper:
+    container_name: "my_scala_zookeeper"
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    container_name: "my_scala_kafka"
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.0.18 # mac -> ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' linux -> hostname -i | awk '{print $1}'
+      KAFKA_CREATE_TOPICS: "fs2.topic:3:1" # topic akka.topic with 3 partition and 1 replica
+      KAFKA_ZOOKEEPER_CONNECT: 192.168.0.18:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
