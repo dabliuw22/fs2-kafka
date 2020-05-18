@@ -11,7 +11,6 @@ object Json {
   private val mapper = new ObjectMapper()
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-  mapper.enableDefaultTyping()
   mapper.registerModule(DefaultScalaModule)
 
   @throws(classOf[RuntimeException])
