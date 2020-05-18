@@ -10,7 +10,7 @@ object Dependencies {
   lazy val scalaTestPlusParent = "org.scalatestplus"
   lazy val scalaTestPlusVersion = "3.1.0.1"
 
-  def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
+  def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.1.1"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
   def fs2Kafka(artifact: String): ModuleID = "com.github.fd4s" %% artifact % "1.0.0"

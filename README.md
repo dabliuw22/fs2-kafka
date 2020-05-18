@@ -47,7 +47,7 @@
     `./{KAFKA_PATH}/bin/kafka-console-consumer.sh -bootstrap-server localhost:9092 --topic fs2.topic --from-beginning`
    
 7. Run Consumer App:
-    * `ConsumerKafka`: Reactor Consumer Kafka.
+    * `ConsumerKafka`: Fs2 Consumer Kafka.
 
 8. Run Publisher App:
-    * `PublisherKafka`: Reactor Publisher Kafka.
+    * `PublisherKafka`: Fs2 Publisher Kafka.
