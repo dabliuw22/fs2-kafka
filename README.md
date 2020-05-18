@@ -19,10 +19,10 @@
     `/opt/kafka/bin/kafka-console-consumer.sh -bootstrap-server {IP}:9092 --topic fs2.topic --from-beginning`
     
 5. Run Consumer App:
-    * `ConsumerKafka`: Reactor Consumer Kafka.
+    * `ConsumerKafka`: Fs2 Consumer Kafka.
 
 6. Run Publisher App:
-    * `PublisherKafka`: Reactor Publisher Kafka.
+    * `PublisherKafka`: Fs2 Publisher Kafka.
 
 ## Dowload Apache Kafka
 

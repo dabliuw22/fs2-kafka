@@ -14,25 +14,31 @@ object ConsumerApp extends IOApp {
   val logger = Slf4jLogger.getLoggerFromClass[IO](ConsumerApp.getClass)
 
   val keyDeserializer: Deserializer[IO, String] = Deserializer[IO, String]
-  val deserializer: Deserializer[IO, Message] = Deserializer.delegate[IO, Message](JsonSerde())
-  val consumerSettings: ConsumerSettings[IO, String, Message] = ConsumerSettings(
-    keyDeserializer = keyDeserializer,
-    valueDeserializer = deserializer
-  ).withBootstrapServers("localhost:9092")
-    .withGroupId("fs2.group")
-    .withEnableAutoCommit(false)
-    .withAutoOffsetReset(AutoOffsetReset.Earliest)
-    .withIsolationLevel(IsolationLevel.ReadCommitted)
+  val deserializer: Deserializer[IO, Message] =
+    Deserializer.delegate[IO, Message](JsonSerde())
+  val consumerSettings: ConsumerSettings[IO, String, Message] =
+    ConsumerSettings(
+      keyDeserializer = keyDeserializer,
+      valueDeserializer = deserializer
+    ).withBootstrapServers("localhost:9092")
+      .withGroupId("fs2.group")
+      .withEnableAutoCommit(false)
+      .withAutoOffsetReset(AutoOffsetReset.Earliest)
+      .withIsolationLevel(IsolationLevel.ReadCommitted)
 
-  override def run(args: List[String]): IO[ExitCode] = consumerStream[IO]
-    .using(consumerSettings)
-    .evalTap(_.subscribeTo("fs2.topic"))
-    .flatMap(_.stream)
-    .mapAsync(20) { message =>
-      process(message.record).as(message.offset)
-    }.through(commitBatchWithin(500, 10 seconds))
-    .compile.drain.as(ExitCode.Success)
+  override def run(args: List[String]): IO[ExitCode] =
+    consumerStream[IO]
+      .using(consumerSettings)
+      .evalTap(_.subscribeTo("fs2.topic"))
+      .flatMap(_.stream)
+      .mapAsync(20) { message =>
+        process(message.record).as(message.offset)
+      }
+      .through(commitBatchWithin(500, 10 seconds))
+      .compile
+      .drain
+      .as(ExitCode.Success)
 
   def process(record: ConsumerRecord[String, Message]): IO[Unit] =
-    IO { logger.info(s"Message: ${record.value}") }
+    logger.info(s"Message: ${record.value}")
 }

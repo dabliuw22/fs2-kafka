@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="stdOut" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %highlight([%level]) [%date{HH:mm:ss.SSS}] %magenta([%thread]) [%class#%method:%line] %message %n%throwable
+            </pattern>
+        </encoder>
+    </appender>
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <root level="all">
+        <appender-ref ref="stdOut"/>
+    </root>
+</configuration>
