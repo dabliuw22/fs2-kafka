@@ -2,7 +2,7 @@ package com.leysoft
 
 import cats.effect.ExitCode
 import com.leysoft.serde.JsonSerde
-import com.leysoft.domain.{Message, MessageEvent}
+import com.leysoft.domain.{Message, MessageEvent, Metadata}
 import fs2.kafka._
 import fs2.Stream
 import monix.eval.{Task, TaskApp}
@@ -29,7 +29,7 @@ object ProducerApp extends TaskApp {
 
   override def run(args: List[String]): Task[ExitCode] = {
     Stream("Fs2", "Cats", "Kafka")
-      .map(MessageEvent.apply)
+      .map(MessageEvent(_, Metadata(topic = "fs2.topic")))
       .covary[Task]
       .map { message =>
         val record = ProducerRecord("fs2.topic", "fs2.key", message)

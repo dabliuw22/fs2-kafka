@@ -15,7 +15,8 @@ object Dependencies {
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
   def fs2Kafka(artifact: String): ModuleID = "com.github.fd4s" %% artifact % "1.0.0"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
-  def jackson(artifact: String): ModuleID = "com.fasterxml.jackson.module" %% artifact % "2.10.0"
+  def jackson(artifact: String): ModuleID = "com.fasterxml.jackson.module" %% artifact % "2.11.0"
+  def jacksonModule(artifact: String): ModuleID =  "com.fasterxml.jackson.datatype" % artifact % "2.11.0"
   def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
   def scalaLog(artifact: String): ModuleID = "com.typesafe.scala-logging" %% artifact % "3.9.2"
   def logback(artifact: String): ModuleID = "ch.qos.logback" % artifact % "1.2.3"
@@ -33,6 +34,8 @@ object Dependencies {
     circe("circe-generic"),
     circe("circe-literal"),
     jackson("jackson-module-scala"),
+    jacksonModule("jackson-datatype-jdk8"),
+    jacksonModule("jackson-datatype-jsr310"),
     scalaLog("scala-logging"),
     logback("logback-classic"),
     logbackEncoder("logstash-logback-encoder"),
