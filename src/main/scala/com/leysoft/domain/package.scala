@@ -8,6 +8,7 @@ package object domain {
 
   case class Metadata(
     topic: String,
+    key: String,
     createAt: ZonedDateTime = ZonedDateTime.now
   )
 

@@ -1,8 +1,9 @@
 package com.leysoft
 
 import cats.effect.ExitCode
-import com.leysoft.serde.JsonSerde
+import com.leysoft.adapters.KafkaMessagePublisher
 import com.leysoft.domain.{Message, MessageEvent, Metadata}
+import com.leysoft.serde.JsonSerde
 import fs2.kafka._
 import fs2.Stream
 import monix.eval.{Task, TaskApp}
@@ -10,15 +11,33 @@ import monix.eval.{Task, TaskApp}
 import scala.concurrent.duration._
 
 object ProducerApp extends TaskApp {
-  import cats.syntax.functor._ // for as()
 
-  val keySerializer: Serializer[Task, String] = Serializer[Task, String]
-  val serializer: Serializer[Task, Message] =
+  override def run(args: List[String]): Task[ExitCode] =
+    producerResource[Task]
+      .using(settings)
+      .use { producer =>
+        for {
+          publisher <- KafkaMessagePublisher.make[Task](producer, settings)
+          _ <- Stream("Fs2", "Cats", "Kafka")
+                .map(
+                  MessageEvent(_,
+                               Metadata(topic = "fs2.topic", key = "fs2.key"))
+                )
+                .flatMap(publisher.publish)
+                .compile
+                .drain
+        } yield ExitCode.Success
+      }
+
+  private def keySerializer: Serializer[Task, String] = Serializer[Task, String]
+
+  private def valueSerializer: Serializer[Task, Message] =
     Serializer.delegate[Task, Message](JsonSerde())
-  val producerSettings: ProducerSettings[Task, String, Message] =
+
+  private def settings: ProducerSettings[Task, String, Message] =
     ProducerSettings(
       keySerializer = keySerializer,
-      valueSerializer = serializer
+      valueSerializer = valueSerializer
     ).withBootstrapServers("localhost:9092")
       .withClientId("fs2.client")
       .withBatchSize(500)
@@ -26,18 +45,4 @@ object ProducerApp extends TaskApp {
       .withEnableIdempotence(true)
       .withRetries(3)
       .withAcks(Acks.All)
-
-  override def run(args: List[String]): Task[ExitCode] = {
-    Stream("Fs2", "Cats", "Kafka")
-      .map(MessageEvent(_, Metadata(topic = "fs2.topic")))
-      .covary[Task]
-      .map { message =>
-        val record = ProducerRecord("fs2.topic", "fs2.key", message)
-        ProducerRecords.one(record)
-      }
-      .through(produce(producerSettings))
-      .compile
-      .drain
-      .as(ExitCode.Success)
-  }
 }
