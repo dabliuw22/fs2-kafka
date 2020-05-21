@@ -17,6 +17,8 @@ object Dependencies {
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
   def jackson(artifact: String): ModuleID = "com.fasterxml.jackson.module" %% artifact % "2.11.0"
   def jacksonModule(artifact: String): ModuleID =  "com.fasterxml.jackson.datatype" % artifact % "2.11.0"
+  def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
+  def ciris(artifact: String): ModuleID = "is.cir" %% artifact % "1.0.4"
   def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
   def scalaLog(artifact: String): ModuleID = "com.typesafe.scala-logging" %% artifact % "3.9.2"
   def logback(artifact: String): ModuleID = "ch.qos.logback" % artifact % "1.2.3"
@@ -36,6 +38,11 @@ object Dependencies {
     jackson("jackson-module-scala"),
     jacksonModule("jackson-datatype-jdk8"),
     jacksonModule("jackson-datatype-jsr310"),
+    refined("refined"),
+    refined("refined-cats"),
+    ciris("ciris"),
+    ciris("ciris-enumeratum"),
+    ciris("ciris-refined"),
     scalaLog("scala-logging"),
     logback("logback-classic"),
     logbackEncoder("logstash-logback-encoder"),

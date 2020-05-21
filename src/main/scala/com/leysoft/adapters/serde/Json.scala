@@ -1,4 +1,4 @@
-package com.leysoft.serde
+package com.leysoft.adapters.serde
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.{DeserializationFeature, SerializationFeature}

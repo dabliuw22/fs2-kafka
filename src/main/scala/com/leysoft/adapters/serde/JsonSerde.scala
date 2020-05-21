@@ -1,4 +1,4 @@
-package com.leysoft.serde
+package com.leysoft.adapters.serde
 
 import java.util
 
