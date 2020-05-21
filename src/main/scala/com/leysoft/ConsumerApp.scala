@@ -13,22 +13,9 @@ object ConsumerApp extends IOApp {
 
   val logger = Slf4jLogger.getLoggerFromClass[IO](ConsumerApp.getClass)
 
-  val keyDeserializer: Deserializer[IO, String] = Deserializer[IO, String]
-  val deserializer: Deserializer[IO, Message] =
-    Deserializer.delegate[IO, Message](JsonSerde())
-  val consumerSettings: ConsumerSettings[IO, String, Message] =
-    ConsumerSettings(
-      keyDeserializer = keyDeserializer,
-      valueDeserializer = deserializer
-    ).withBootstrapServers("localhost:9092")
-      .withGroupId("fs2.group")
-      .withEnableAutoCommit(false)
-      .withAutoOffsetReset(AutoOffsetReset.Earliest)
-      .withIsolationLevel(IsolationLevel.ReadCommitted)
-
   override def run(args: List[String]): IO[ExitCode] =
     consumerStream[IO]
-      .using(consumerSettings)
+      .using(settings)
       .evalTap(_.subscribeTo("fs2.topic"))
       .flatMap(_.stream)
       .mapAsync(20) { message =>
@@ -41,4 +28,20 @@ object ConsumerApp extends IOApp {
 
   def process(record: ConsumerRecord[String, Message]): IO[Unit] =
     logger.info(s"Message: ${record.value}")
+
+  private def keyDeserializer: Deserializer[IO, String] =
+    Deserializer[IO, String]
+
+  private def valueDeserializer: Deserializer[IO, Message] =
+    Deserializer.delegate[IO, Message](JsonSerde())
+
+  private def settings: ConsumerSettings[IO, String, Message] =
+    ConsumerSettings(
+      keyDeserializer = keyDeserializer,
+      valueDeserializer = valueDeserializer
+    ).withBootstrapServers("localhost:9092")
+      .withGroupId("fs2.group")
+      .withEnableAutoCommit(false)
+      .withAutoOffsetReset(AutoOffsetReset.Earliest)
+      .withIsolationLevel(IsolationLevel.ReadCommitted)
 }

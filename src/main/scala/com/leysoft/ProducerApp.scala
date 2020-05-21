@@ -7,6 +7,7 @@ import com.leysoft.serde.JsonSerde
 import fs2.kafka._
 import fs2.Stream
 import monix.eval.{Task, TaskApp}
+import org.apache.kafka.clients.producer.ProducerConfig
 
 import scala.concurrent.duration._
 
@@ -43,6 +44,8 @@ object ProducerApp extends TaskApp {
       .withBatchSize(500)
       .withLinger(10 milliseconds)
       .withEnableIdempotence(true)
+      .withMaxInFlightRequestsPerConnection(3)
       .withRetries(3)
       .withAcks(Acks.All)
+      .withProperties((ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy"))
 }
