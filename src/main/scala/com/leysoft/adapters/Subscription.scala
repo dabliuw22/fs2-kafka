@@ -12,8 +12,8 @@ final class Subscription[F[_]: Effect] private () {
                               handler: MessageHandler[F]): F[Unit] = {
     Effect[F].delay {
       subscribers.get(clazz) match {
-        case Some(list) =>
-          subscribers.put(clazz, list.appended(handler))
+        case Some(handlers) =>
+          subscribers.put(clazz, handlers.appended(handler))
         case _ =>
           subscribers.put(clazz, List(handler))
       }
@@ -22,8 +22,8 @@ final class Subscription[F[_]: Effect] private () {
 
   def run[A <: Message](message: A): fs2.Stream[F, Unit] =
     subscribers.get(message.getClass) match {
-      case Some(list) =>
-        fs2.Stream.emits(list).covary[F].flatMap(_.execute(message))
+      case Some(handlers) =>
+        fs2.Stream.emits(handlers).covary[F].flatMap(_.execute(message))
       case _ =>
         fs2.Stream.raiseError(
           new RuntimeException(
