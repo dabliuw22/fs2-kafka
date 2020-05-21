@@ -2,8 +2,9 @@ package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.leysoft.adapters.config.{KafkaConsumerConfiguration, config}
-import com.leysoft.adapters.{KafkaMessageSubscriber, MessageEventHandler, Subscription}
+import com.leysoft.adapters.{KafkaMessageSubscriber, Subscription}
 import com.leysoft.adapters.serde.JsonSerde
+import com.leysoft.application.MessageEventHandler
 import com.leysoft.domain.{Message, MessageEvent}
 import fs2.kafka._
 
