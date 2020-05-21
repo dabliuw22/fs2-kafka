@@ -1,33 +1,24 @@
 package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
+import com.leysoft.adapters.{KafkaMessageSubscriber, MessageEventHandler, Subscription}
 import com.leysoft.serde.JsonSerde
-import com.leysoft.domain.Message
+import com.leysoft.domain.{Message, MessageEvent}
 import fs2.kafka._
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-
-import scala.concurrent.duration._
 
 object ConsumerApp extends IOApp {
-  import cats.syntax.functor._ // for as()
-
-  val logger = Slf4jLogger.getLoggerFromClass[IO](ConsumerApp.getClass)
 
   override def run(args: List[String]): IO[ExitCode] =
-    consumerStream[IO]
-      .using(settings)
-      .evalTap(_.subscribeTo("fs2.topic"))
-      .flatMap(_.stream)
-      .mapAsync(20) { message =>
-        process(message.record).as(message.offset)
-      }
-      .through(commitBatchWithin(500, 10 seconds))
-      .compile
-      .drain
-      .as(ExitCode.Success)
-
-  def process(record: ConsumerRecord[String, Message]): IO[Unit] =
-    logger.info(s"Message: ${record.value}")
+    consumerResource[IO].using(settings).use { consumer =>
+      for {
+        subscription <- Subscription.make[IO]
+        handler <- MessageEventHandler.make[IO]
+        _ <- subscription.subscribe(classOf[MessageEvent], handler)
+        subscriber <- KafkaMessageSubscriber
+                       .make[IO](consumer, subscription)
+        _ <- subscriber.execute("fs2.topic").compile.drain
+      } yield ExitCode.Success
+    }
 
   private def keyDeserializer: Deserializer[IO, String] =
     Deserializer[IO, String]
