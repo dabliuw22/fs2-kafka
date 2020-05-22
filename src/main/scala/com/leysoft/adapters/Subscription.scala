@@ -2,8 +2,12 @@ package com.leysoft.adapters
 
 import cats.effect.Effect
 import com.leysoft.domain.{Message, MessageHandler}
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 final class Subscription[F[_]: Effect] private () {
+
+  private val logger =
+    Slf4jLogger.getLoggerFromClass[F](classOf[Subscription[F]])
 
   val subscribers =
     collection.mutable.Map[Class[_], List[MessageHandler[F]]]()
@@ -25,10 +29,8 @@ final class Subscription[F[_]: Effect] private () {
       case Some(handlers) =>
         fs2.Stream.emits(handlers).covary[F].flatMap(_.execute(message))
       case _ =>
-        fs2.Stream.raiseError(
-          new RuntimeException(
-            s"There are no handlers for: ${message.getClass}"
-          )
+        fs2.Stream.eval(
+          logger.error(s"Error: There are no handlers for: ${message.getClass}")
         )
     }
 }

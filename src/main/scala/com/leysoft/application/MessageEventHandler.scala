@@ -12,8 +12,10 @@ final class MessageEventHandler[F[_]: Effect] private ()
 
   override def execute[A <: Message](message: A): fs2.Stream[F, Unit] =
     message match {
-      case m: MessageEvent => fs2.Stream.eval(logger.info(s"Execute: $m"))
-      case _               => fs2.Stream.empty
+      case m: MessageEvent =>
+        fs2.Stream
+          .eval(logger.info(s"Execute: $m"))
+      case _ => fs2.Stream.empty.covary[F]
     }
 }
 
