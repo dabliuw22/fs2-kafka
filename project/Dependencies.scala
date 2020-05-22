@@ -14,6 +14,7 @@ object Dependencies {
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
   def fs2Kafka(artifact: String): ModuleID = "com.github.fd4s" %% artifact % "1.0.0"
+  def kafka(artifact: String): ModuleID = "org.apache.kafka" % artifact % "2.4.0"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
   def jackson(artifact: String): ModuleID = "com.fasterxml.jackson.module" %% artifact % "2.11.0"
   def jacksonModule(artifact: String): ModuleID =  "com.fasterxml.jackson.datatype" % artifact % "2.11.0"
@@ -33,6 +34,7 @@ object Dependencies {
     monix("monix-execution"),
     fs2("fs2-core"),
     fs2Kafka("fs2-kafka"),
+    kafka("kafka-streams"),
     circe("circe-generic"),
     circe("circe-literal"),
     jackson("jackson-module-scala"),
