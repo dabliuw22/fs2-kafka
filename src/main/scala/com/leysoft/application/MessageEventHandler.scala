@@ -1,7 +1,7 @@
 package com.leysoft.application
 
 import cats.effect.Effect
-import com.leysoft.domain.{Message, MessageEvent, MessageHandler}
+import com.leysoft.domain.{Message, MessageEvent, MessageHandler, SecondMessageEvent}
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 final class MessageEventHandler[F[_]: Effect] private ()
@@ -10,7 +10,7 @@ final class MessageEventHandler[F[_]: Effect] private ()
   private val logger =
     Slf4jLogger.getLoggerFromClass[F](classOf[MessageEventHandler[F]])
 
-  override def execute[A <: Message](message: A): fs2.Stream[F, Unit] =
+  override def execute[A <: Message](message: A): fs2.Stream[F, Message] =
     message match {
       case m: MessageEvent =>
         fs2.Stream

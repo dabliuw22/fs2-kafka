@@ -24,14 +24,14 @@ final class Subscription[F[_]: Effect] private () {
     }
   }
 
-  def run[A <: Message](message: A): fs2.Stream[F, Unit] =
+  def run[A <: Message](message: A): fs2.Stream[F, Message] =
     subscribers.get(message.getClass) match {
       case Some(handlers) =>
         fs2.Stream.emits(handlers).covary[F].flatMap(_.execute(message))
       case _ =>
         fs2.Stream.eval(
           logger.error(s"Error: There are no handlers for: ${message.getClass}")
-        )
+        ) >> fs2.Stream.empty.covary[F]
     }
 }
 

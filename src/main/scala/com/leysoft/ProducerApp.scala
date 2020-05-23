@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.effect.ExitCode
 import com.leysoft.adapters.config._
 import com.leysoft.adapters.KafkaMessagePublisher
-import com.leysoft.domain.{MessageEvent, Metadata}
+import com.leysoft.domain.{MessageEvent, Metadata, SecondMessageEvent}
 import fs2.kafka._
 import fs2.Stream
 import monix.eval.{Task, TaskApp}
@@ -29,6 +29,16 @@ object ProducerApp extends TaskApp {
                                             key = UUID.randomUUID.toString))
                     )
                     .flatMap(publisher.publish)
+                    .compile
+                    .drain
+              _ <- publisher
+                    .publish(
+                      SecondMessageEvent(
+                        "Monix",
+                        Metadata(topic = "fs2.topic",
+                                 key = UUID.randomUUID.toString)
+                      )
+                    )
                     .compile
                     .drain
             } yield ExitCode.Success

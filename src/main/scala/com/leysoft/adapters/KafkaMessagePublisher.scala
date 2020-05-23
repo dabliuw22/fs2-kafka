@@ -1,18 +1,21 @@
 package com.leysoft.adapters
 
 import cats.effect.{ConcurrentEffect, ContextShift}
-import com.leysoft.domain
-import com.leysoft.domain.{Message, MessagePublisher}
+import com.leysoft.domain.{Message, MessagePublisher, Metadata}
 import fs2.kafka._
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private (
   val producer: KafkaProducer[F, String, Message],
   val settings: ProducerSettings[F, String, Message]
 ) extends MessagePublisher[F] {
 
-  override def publish[A <: domain.Message](
+  private val logger =
+    Slf4jLogger.getLoggerFromClass[F](classOf[KafkaMessagePublisher[F]])
+
+  override def publish[A <: Message](
     message: A
-  ): fs2.Stream[F, domain.Metadata] =
+  ): fs2.Stream[F, Metadata] =
     fs2.Stream
       .emit(message)
       .map { message =>
@@ -23,6 +26,7 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
       .covary[F]
       .through(produce(settings, producer))
       .as(message.metadata)
+      .onFinalize(logger.info(s"Publish: $message"))
 }
 
 object KafkaMessagePublisher {

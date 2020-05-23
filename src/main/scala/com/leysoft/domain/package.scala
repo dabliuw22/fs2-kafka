@@ -26,4 +26,9 @@ package object domain {
     data: String,
     override val metadata: Metadata
   ) extends Message
+
+  case class SecondMessageEvent(
+    data: String,
+    override val metadata: Metadata
+  ) extends Message
 }

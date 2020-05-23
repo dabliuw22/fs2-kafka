@@ -23,11 +23,12 @@ final class KafkaMessageSubscriber[F[_]: ConcurrentEffect: Timer] private (
       .flatMap(_.stream)
       .flatMap(message => run(message))
       .map(message => message.offset)
-      .through(commitBatchWithin(500, 10 seconds))
+      .through(commitBatchWithin(100, 500 milliseconds))
 
   private def run(message: CommittableConsumerRecord[F, String, Message]) =
     subscription
       .run(message.record.value)
+      .as(())
       .handleErrorWith(
         _ =>
           fs2.Stream.eval(
