@@ -21,19 +21,22 @@ final class KafkaMessageSubscriber[F[_]: ConcurrentEffect: Timer] private (
       .covary[F]
       .evalTap(_.subscribeTo(topics.head, topics.tail: _*))
       .flatMap(_.stream)
-      .flatMap { message =>
-        subscription
-          .run(message.record.value)
-          .handleErrorWith(
-            _ =>
-              fs2.Stream.eval(
-                logger
-                  .error(s"Error consuming: ${message.record.value.getClass}")
-            )
-          )
-          .as(message.offset)
-      }
+      .flatMap(message => run(message))
+      .map(message => message.offset)
       .through(commitBatchWithin(500, 10 seconds))
+
+  private def run(message: CommittableConsumerRecord[F, String, Message]) =
+    subscription
+      .run(message.record.value)
+      .handleErrorWith(
+        _ =>
+          fs2.Stream.eval(
+            logger
+              .error(s"Error consuming: ${message.record.value.getClass}")
+          ) >> fs2.Stream.empty.covary[F]
+      )
+      .hold(())
+      .as(message)
 }
 
 object KafkaMessageSubscriber {

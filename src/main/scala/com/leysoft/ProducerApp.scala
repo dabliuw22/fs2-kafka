@@ -1,5 +1,7 @@
 package com.leysoft
 
+import java.util.UUID
+
 import cats.effect.ExitCode
 import com.leysoft.adapters.config._
 import com.leysoft.adapters.KafkaMessagePublisher
@@ -24,7 +26,7 @@ object ProducerApp extends TaskApp {
                     .map(
                       MessageEvent(_,
                                    Metadata(topic = "fs2.topic",
-                                            key = "fs2.key"))
+                                            key = UUID.randomUUID.toString))
                     )
                     .flatMap(publisher.publish)
                     .compile
