@@ -28,7 +28,6 @@ final class KafkaMessageSubscriber[F[_]: ConcurrentEffect: Timer] private (
   private def run(message: CommittableConsumerRecord[F, String, Message]) =
     subscription
       .run(message.record.value)
-      .as(())
       .handleErrorWith(
         _ =>
           fs2.Stream.eval(

@@ -10,7 +10,7 @@ final class MessageEventHandler[F[_]: Effect] private ()
   private val logger =
     Slf4jLogger.getLoggerFromClass[F](classOf[MessageEventHandler[F]])
 
-  override def execute[A <: Message](message: A): fs2.Stream[F, Message] =
+  override def execute[A <: Message](message: A): fs2.Stream[F, Unit] =
     message match {
       case m: MessageEvent =>
         fs2.Stream

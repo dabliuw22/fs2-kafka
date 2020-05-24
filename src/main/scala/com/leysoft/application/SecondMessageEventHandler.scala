@@ -10,11 +10,11 @@ final class SecondMessageEventHandler[F[_]: Effect] private ()
   private val logger =
     Slf4jLogger.getLoggerFromClass[F](classOf[SecondMessageEventHandler[F]])
 
-  override def execute[A <: Message](message: A): fs2.Stream[F, Message] =
+  override def execute[A <: Message](message: A): fs2.Stream[F, Unit] =
     message match {
       case m: SecondMessageEvent =>
         fs2.Stream
-          .eval(logger.info(s"Second Execute: $m")) >> fs2.Stream.empty
+          .eval(logger.info(s"Second Execute: $m"))
           .covary[F]
       case _ => fs2.Stream.empty.covary[F]
     }

@@ -24,7 +24,7 @@ final class Subscription[F[_]: Effect] private () {
     }
   }
 
-  def run[A <: Message](message: A): fs2.Stream[F, Message] =
+  def run[A <: Message](message: A): fs2.Stream[F, Unit] =
     subscribers.get(message.getClass) match {
       case Some(handlers) =>
         fs2.Stream.emits(handlers).covary[F].flatMap(_.execute(message))
