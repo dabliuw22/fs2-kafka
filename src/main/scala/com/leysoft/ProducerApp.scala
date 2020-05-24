@@ -28,7 +28,7 @@ object ProducerApp extends TaskApp {
                                    Metadata(topic = "fs2.topic",
                                             key = UUID.randomUUID.toString))
                     )
-                    .flatMap(publisher.publish)
+                    .evalMap(publisher.publish)
                     .compile
                     .drain
               _ <- publisher
@@ -39,8 +39,6 @@ object ProducerApp extends TaskApp {
                                  key = UUID.randomUUID.toString)
                       )
                     )
-                    .compile
-                    .drain
             } yield ExitCode.Success
           }
       }

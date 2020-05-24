@@ -1,6 +1,7 @@
 package com.leysoft.adapters
 
 import cats.effect.{ConcurrentEffect, ContextShift}
+import cats.syntax.functor._
 import com.leysoft.domain.{Message, MessagePublisher, Metadata}
 import fs2.kafka._
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -15,7 +16,7 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
 
   override def publish[A <: Message](
     message: A
-  ): fs2.Stream[F, Metadata] =
+  ): F[Metadata] =
     fs2.Stream
       .emit(message)
       .map { message =>
@@ -26,7 +27,12 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
       .covary[F]
       .through(produce(settings, producer))
       .as(message.metadata)
-      .onFinalize(logger.info(s"Publish: $message"))
+      .compile
+      .toList
+      .map {
+        case head :: tail => head
+        case Nil          => throw new RuntimeException(s"Message not published")
+      }
 }
 
 object KafkaMessagePublisher {
