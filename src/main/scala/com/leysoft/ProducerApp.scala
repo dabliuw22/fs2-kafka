@@ -20,7 +20,6 @@ object ProducerApp extends TaskApp {
           .using(settings)
           .use { producer =>
             for {
-
               publisher <- KafkaMessagePublisher.make[Task](producer, settings)
               _ <- Stream("Fs2", "Cats", "Kafka")
                     .map(
