@@ -35,7 +35,6 @@ final class KafkaMessageSubscriber[F[_]: ConcurrentEffect: Timer] private (
               .error(s"Error consuming: ${message.record.value.getClass}")
           ) >> fs2.Stream.empty.covary[F]
       )
-      .hold(())
       .as(message)
 }
 

@@ -16,7 +16,8 @@ final class SecondMessageEventHandler[F[_]: Effect] private ()
         fs2.Stream
           .eval(logger.info(s"Second Execute: $m"))
           .covary[F]
-      case _ => fs2.Stream.empty.covary[F]
+          .evalMap(_ => logger.info(s"Second Finalize: $m"))
+      case _ => unit
     }
 }
 

@@ -1,11 +1,12 @@
 package com.leysoft.application
 
 import cats.effect.Effect
-import com.leysoft.domain.{Message, MessageEvent, MessageHandler, SecondMessageEvent}
+import com.leysoft.domain.{Message, MessageEvent, MessageHandler, MessagePublisher, SecondMessageEvent}
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-final class MessageEventHandler[F[_]: Effect] private ()
-    extends MessageHandler[F] {
+final class MessageEventHandler[F[_]: Effect] private (
+  val publisher: MessagePublisher[F]
+) extends MessageHandler[F] {
 
   private val logger =
     Slf4jLogger.getLoggerFromClass[F](classOf[MessageEventHandler[F]])
@@ -14,13 +15,21 @@ final class MessageEventHandler[F[_]: Effect] private ()
     message match {
       case m: MessageEvent =>
         fs2.Stream
-          .eval(logger.info(s"Execute: $m")) >> fs2.Stream.empty.covary[F]
-      case _ => fs2.Stream.empty.covary[F]
+          .eval(logger.info(s"Execute: $m")) >> fs2.Stream
+          .emit {
+            SecondMessageEvent(
+              data = s"New ${m.data}",
+              metadata = m.metadata
+            )
+          }
+          .evalMap(publisher.publish)
+          .evalMap(_ => logger.info(s"Finalize: $m"))
+      case _ => unit
     }
 }
 
 object MessageEventHandler {
 
-  def make[F[_]: Effect]: F[MessageHandler[F]] =
-    Effect[F].delay(new MessageEventHandler[F])
+  def make[F[_]: Effect](publisher: MessagePublisher[F]): F[MessageHandler[F]] =
+    Effect[F].delay(new MessageEventHandler[F](publisher))
 }

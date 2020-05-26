@@ -18,13 +18,12 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
     message: A
   ): F[Metadata] =
     fs2.Stream
-      .emit(message)
-      .map { message =>
+      .eval(ConcurrentEffect[F].delay(message))
+      .map { m =>
         val record =
-          ProducerRecord(message.metadata.topic, message.metadata.key, message)
+          ProducerRecord(m.metadata.topic, m.metadata.key, m)
         ProducerRecords.one(record)
       }
-      .covary[F]
       .through(produce(settings, producer))
       .as(message.metadata)
       .compile
