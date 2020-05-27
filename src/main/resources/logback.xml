@@ -3,7 +3,7 @@
     <appender name="stdOut" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
-                %highlight([%level]) [%date{HH:mm:ss.SSS}] %magenta([%thread]) [%class#%method:%line] %message %n%throwable
+                %highlight([%level]) [%date{HH:mm:ss.SSS}] %magenta([%thread]) [%logger] %message %n%throwable
             </pattern>
         </encoder>
     </appender>
