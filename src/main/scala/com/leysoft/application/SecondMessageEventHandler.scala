@@ -17,7 +17,7 @@ final class SecondMessageEventHandler[F[_]: Effect] private ()
           .eval(logger.info(s"Second Execute: $m"))
           .covary[F]
           .evalMap(_ => logger.info(s"Second Finalize: $m"))
-      case _ => unit
+      case _ => unit(logger, message)
     }
 }
 

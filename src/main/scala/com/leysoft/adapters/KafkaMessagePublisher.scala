@@ -1,6 +1,7 @@
 package com.leysoft.adapters
 
 import cats.effect.{ConcurrentEffect, ContextShift}
+import cats.syntax.apply._
 import cats.syntax.functor._
 import com.leysoft.domain.{Message, MessagePublisher, Metadata}
 import fs2.kafka._
@@ -18,7 +19,8 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
     message: A
   ): F[Metadata] =
     fs2.Stream
-      .eval(ConcurrentEffect[F].delay(message))
+      .emit(message)
+      .covary[F]
       .map { m =>
         val record =
           ProducerRecord(m.metadata.topic, m.metadata.key, m)
@@ -31,7 +33,7 @@ final class KafkaMessagePublisher[F[_]: ConcurrentEffect: ContextShift] private 
       .map {
         case head :: tail => head
         case Nil          => throw new RuntimeException(s"Message not published")
-      }
+      } <* logger.info(s"Publish: $message")
 }
 
 object KafkaMessagePublisher {

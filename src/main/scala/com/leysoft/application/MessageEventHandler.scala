@@ -24,7 +24,7 @@ final class MessageEventHandler[F[_]: Effect] private (
           }
           .evalMap(publisher.publish)
           .evalMap(_ => logger.info(s"Finalize: $m"))
-      case _ => unit
+      case _ => unit(logger, message)
     }
 }
 
