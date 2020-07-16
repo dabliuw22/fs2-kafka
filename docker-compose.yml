@@ -14,7 +14,7 @@ services:
       - zookeeper
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 192.168.0.12 # mac -> ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' linux -> hostname -i | awk '{print $1}'
-      KAFKA_CREATE_TOPICS: "fs2.topic:3:1" # topic akka.topic with 3 partition and 1 replica
+      KAFKA_CREATE_TOPICS: "fs2.topic:3:1" # topic fs2.topic with 3 partition and 1 replica
       KAFKA_ZOOKEEPER_CONNECT: 192.168.0.12:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
