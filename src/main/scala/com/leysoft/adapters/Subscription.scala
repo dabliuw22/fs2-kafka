@@ -4,11 +4,12 @@ import cats.effect.Effect
 import cats.effect.concurrent.Ref
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import com.leysoft.adapters.Subscription.Subscriptions
 import com.leysoft.domain.{Message, MessageHandler}
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 final class Subscription[F[_]: Effect] private (
-  subscribers: Ref[F, Map[Class[_], List[MessageHandler[F]]]]
+  subscriptions: Subscriptions[F]
 ) {
 
   private val logger =
@@ -16,18 +17,18 @@ final class Subscription[F[_]: Effect] private (
 
   def subscribe[A <: Message](clazz: Class[A],
                               handler: MessageHandler[F]): F[Unit] = {
-    subscribers.get.flatMap { result =>
-      result.get(clazz) match {
+    subscriptions.get.flatMap(
+      _.get(clazz) match {
         case Some(handlers) =>
-          subscribers.update(_.updated(clazz, handlers.appended(handler)))
-        case None => subscribers.update(_.updated(clazz, List(handler)))
+          subscriptions.update(_.updated(clazz, handlers.appended(handler)))
+        case _ => subscriptions.update(_.updated(clazz, List(handler)))
       }
-    }
+    )
   }
 
   def run[A <: Message](message: A): fs2.Stream[F, Unit] =
     fs2.Stream
-      .eval { subscribers.get.map(_.get(message.getClass)) }
+      .eval { subscriptions.get.map(_.get(message.getClass)) }
       .flatMap {
         case Some(handlers) =>
           fs2.Stream
@@ -56,8 +57,10 @@ final class Subscription[F[_]: Effect] private (
 
 object Subscription {
 
+  type Subscriptions[F] = Ref[F, Map[Class[_], List[MessageHandler[F]]]]
+
   def make[F[_]: Effect]: F[Subscription[F]] =
     Ref
-      .of { Map[Class[_], List[MessageHandler[F]]]().empty }
-      .map(subscribers => new Subscription[F](subscribers))
+      .of(Map[Class[_], List[MessageHandler[F]]]().empty)
+      .map(subscriptions => new Subscription[F](subscriptions))
 }
