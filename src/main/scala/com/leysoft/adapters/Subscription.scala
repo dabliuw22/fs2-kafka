@@ -39,25 +39,22 @@ final class Subscription[F[_]: Effect] private (
                 .execute(message)
                 .handleErrorWith(
                   _ =>
-                    fs2.Stream.eval(
-                      logger
-                        .error(
-                          s"Handler: ${handler.getClass}, Error consuming: ${message.getClass}"
-                        )
+                    error(
+                      s"Handler: ${handler.getClass}, Error consuming: ${message.getClass}"
                   )
                 )
             }
         case _ =>
-          fs2.Stream.eval(
-            logger
-              .error(s"Error: There are no handlers for: ${message.getClass}")
-          )
+          error(s"Error: There are no handlers for: ${message.getClass}")
       }
+
+  private lazy val error: String => fs2.Stream[F, Unit] = message =>
+    fs2.Stream.eval(logger.error(message))
 }
 
 object Subscription {
 
-  type Subscriptions[F] = Ref[F, Map[Class[_], List[MessageHandler[F]]]]
+  type Subscriptions[F[_]] = Ref[F, Map[Class[_], List[MessageHandler[F]]]]
 
   def make[F[_]: Effect]: F[Subscription[F]] =
     Ref
