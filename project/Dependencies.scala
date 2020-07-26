@@ -13,17 +13,25 @@ object Dependencies {
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.1.1"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
-  def fs2Kafka(artifact: String): ModuleID = "com.github.fd4s" %% artifact % "1.0.0"
-  def kafka(artifact: String): ModuleID = "org.apache.kafka" % artifact % "2.4.0"
+  def fs2Kafka(artifact: String): ModuleID =
+    "com.github.fd4s" %% artifact % "1.0.0"
+  def kafka(artifact: String): ModuleID =
+    "org.apache.kafka" % artifact % "2.4.0"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
-  def jackson(artifact: String): ModuleID = "com.fasterxml.jackson.module" %% artifact % "2.11.0"
-  def jacksonModule(artifact: String): ModuleID =  "com.fasterxml.jackson.datatype" % artifact % "2.11.0"
+  def jackson(artifact: String): ModuleID =
+    "com.fasterxml.jackson.module" %% artifact % "2.11.0"
+  def jacksonModule(artifact: String): ModuleID =
+    "com.fasterxml.jackson.datatype" % artifact % "2.11.0"
   def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
   def ciris(artifact: String): ModuleID = "is.cir" %% artifact % "1.0.4"
-  def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
-  def scalaLog(artifact: String): ModuleID = "com.typesafe.scala-logging" %% artifact % "3.9.2"
-  def logback(artifact: String): ModuleID = "ch.qos.logback" % artifact % "1.2.3"
-  def logbackEncoder(artifact: String): ModuleID = "net.logstash.logback" % artifact % "6.3"
+  def log4cats(artifact: String): ModuleID =
+    "io.chrisdavenport" %% artifact % "1.0.1"
+  def scalaLog(artifact: String): ModuleID =
+    "com.typesafe.scala-logging" %% artifact % "3.9.2"
+  def logback(artifact: String): ModuleID =
+    "ch.qos.logback" % artifact % "1.2.3"
+  def logbackEncoder(artifact: String): ModuleID =
+    "net.logstash.logback" % artifact % "6.3"
 
   val dependencies = Seq(
     cats("cats-macros"),

@@ -8,14 +8,18 @@ import com.leysoft.adapters.{KafkaMessagePublisher, KafkaMessageSubscriber, Subs
 import com.leysoft.application.{MessageEventHandler, NewMessageHandler, SecondMessageEventHandler}
 import com.leysoft.domain.{Message, MessageEvent, MessagePublisher, SecondMessageEvent}
 import fs2.kafka._
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object ConsumerApp extends IOApp {
+
+  private val logger = Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
     loadConfig[IO]
       .use { settings =>
         consumerResource[IO].using(settings._1).use { consumer =>
           producerResource[IO].using(settings._2).use { producer =>
+            shutdown()
             for {
               publisher <- KafkaMessagePublisher.make[IO](producer, settings._2)
               subscription <- subscription[IO](publisher)
@@ -50,4 +54,7 @@ object ConsumerApp extends IOApp {
       _ <- subscription.subscribe(classOf[MessageEvent], newHandler)
       _ <- subscription.subscribe(classOf[SecondMessageEvent], secondHandler)
     } yield subscription
+
+  private def shutdown(): Unit =
+    sys.addShutdownHook(logger.warn("End...").unsafeRunSync())
 }
