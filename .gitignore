@@ -2,3 +2,7 @@ target/
 
 # For IntellIj
 .idea/
+
+# For VSC
+.metals/
+.bloop/
