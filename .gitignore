@@ -1,8 +1,23 @@
 target/
+TAGS
+\#*#
+*~
+.#*
+.lib
+.history
+.*.swp
+.DS_Store
+.sbtrc
 
 # For IntellIj
 .idea/
+.idea_modules
+
+# For Sublime Text
+*.sublime-project
+*.sublime-workspace
 
 # For VSC
 .metals/
 .bloop/
+project/metals.sbt
