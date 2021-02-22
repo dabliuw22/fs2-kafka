@@ -1,6 +1,6 @@
 package com.leysoft
 
-import cats.effect.{ContextShift, Effect, ExitCode, IO, IOApp, Resource}
+import cats.effect.{ConcurrentEffect, ContextShift, Effect, ExitCode, IO, IOApp, Resource, Timer}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.leysoft.adapters.config._
@@ -14,22 +14,31 @@ object ConsumerApp extends IOApp {
 
   private val logger = Slf4jLogger.getLogger[IO]
 
-  override def run(args: List[String]): IO[ExitCode] =
-    loadConfig[IO]
-      .use { settings =>
-        consumerResource[IO].using(settings._1).use { consumer =>
-          producerResource[IO].using(settings._2).use { producer =>
-            shutdown()
-            for {
-              publisher <- KafkaMessagePublisher.make[IO](producer, settings._2)
-              subscription <- subscription[IO](publisher)
-              subscriber <- KafkaMessageSubscriber
-                             .make[IO](consumer, subscription)
-              _ <- subscriber.execute("fs2.topic").compile.drain
-            } yield ExitCode.Success
-          }
-        }
-      }
+  override def run(args: List[String]): IO[ExitCode] = {
+    dependencies[IO].use {
+      case (consumer, producer, settings) =>
+        shutdown()
+        for {
+          publisher <- KafkaMessagePublisher.make[IO](producer, settings._2)
+          subscription <- subscription[IO](publisher)
+          subscriber <- KafkaMessageSubscriber
+                         .make[IO](consumer, subscription)
+          _ <- subscriber.execute("fs2.topic").compile.drain
+        } yield ExitCode.Success
+    }
+  }
+
+  private def dependencies[F[_]: ConcurrentEffect: Timer: ContextShift]
+    : Resource[F,
+               (KafkaConsumer[F, String, Message],
+                KafkaProducer[F, String, Message],
+                (ConsumerSettings[F, String, Message],
+                 ProducerSettings[F, String, Message]))] =
+    for {
+      settings <- loadConfig[F]
+      consumer <- consumerResource[F].using(settings._1)
+      producer <- producerResource[F].using(settings._2)
+    } yield (consumer, producer, settings)
 
   private def loadConfig[F[_]: Effect: ContextShift]
     : Resource[F,
